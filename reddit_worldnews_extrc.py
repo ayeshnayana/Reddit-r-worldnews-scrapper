@@ -26,7 +26,7 @@ now = datetime.datetime.now()
 content = ''
 
 def extract_worldnews(url):
-    print('Extracting Hacker News Stories')
+    print('Extracting r/worldnews stories')
     # Create a placeholder for the content
     cnt = ''
     # create the email heading by passing the heading into the placeholder
@@ -58,4 +58,43 @@ def extract_worldnews(url):
 
 url = 'https://www.reddit.com/r/worldnews/'
 content = extract_worldnews(url)
-print(content)
+content += ('<br>--------------<br>') # Mark the end of the email
+content += ('<br><br>End of message')
+
+# Sending the email...
+print('Composing email...')
+# First create the parameters required to send an email
+SERVER = 'smtp.gmail.com' # Your smtp server
+PORT = 587 # For gmail it is 587
+FROM = '**************' # The senders email address
+TO = '*************' # The receivers email
+PASS = '****************'
+
+# We create a empty object to create the body of the email using MIMEMultipart()
+msg = MIMEMultipart()
+
+# We create a dynamic subject to the email using datetime
+msg['Subject'] = 'Top News Stories HN [Automated Email]' + '' + str(now.day) + '_'+ str(now.month) + '_'+ str(now.year)
+msg['From'] = FROM
+msg['To'] = TO
+
+# To make the email look easthetically more appealing we use the html format
+msg.attach(MIMEText(content, 'html'))
+
+# Authenticating the email
+print('Initializing the server')
+
+# Assign the server and the port
+server = smtplib.SMTP(SERVER, PORT)
+# If you want to see if there is any error like failing to connect to the server put "1" in the debug level
+server.set_debuglevel(1)
+# Initiate the server
+server.ehlo()
+# start the connection
+server.starttls()
+# logging using the id and pass
+server.login(FROM, PASS)
+# Send the mail
+server.sendmail(FROM, TO, msg.as_string())
+print('Email sent...')
+server.quit()
